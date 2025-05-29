@@ -1,36 +1,42 @@
 # VimCoplit
 
-VimCoplit is a Neovim implementation of [Cline](https://github.com/cline/cline), an AI coding assistant that integrates directly into your editor. This project aims to bring the powerful capabilities of Cline to Neovim users, with a Go backend for performance and reliability.
+VimCoplit 是一个基于 [Cline](https://github.com/cline/cline) 的 Neovim 实现版本，它是一个强大的 AI 编码助手，直接集成到您的编辑器中。本项目旨在为 Neovim 用户带来 Cline 的强大功能，并使用 Go 后端提供高性能和可靠性。
 
-## Features
+## 功能特点
 
-- **AI-Powered Coding Assistant**: Leverage Claude 3.7 Sonnet's agentic coding capabilities directly in Neovim
-- **File Operations**: Create, edit, and manage files with AI assistance
-- **Terminal Integration**: Execute commands and monitor output
-- **Browser Automation**: Test web applications with headless browser capabilities
-- **Custom Tools**: Extend functionality through the Model Context Protocol (MCP)
-- **Context Management**: Add URLs, problems, files, and folders to provide context to the AI
+- **AI 驱动的编码助手**：支持多种大语言模型
+  - Claude 3.5 Sonnet：强大的代码理解和生成能力
+  - 豆包：专注于中文场景的智能助手
+  - DeepSeek：高性能的开源模型
+- **文件操作**：创建、编辑和管理文件，获得 AI 辅助
+- **终端集成**：执行命令并监控输出
+- **浏览器自动化**：使用无头浏览器测试 Web 应用
+- **自定义工具**：通过模型上下文协议（MCP）扩展功能
+- **上下文管理**：添加 URL、问题、文件和文件夹以提供 AI 上下文
 
-## Architecture
+## 系统架构
 
-VimCoplit consists of two main components:
+VimCoplit 由两个主要组件组成：
 
-1. **Neovim Plugin**: Written in Lua, providing the user interface and integration with Neovim
-2. **Go Backend**: Handling the heavy lifting of AI interactions, file operations, and system commands
+1. **Neovim 插件**：使用 Lua 编写，提供用户界面和 Neovim 集成
+2. **Go 后端**：处理 AI 交互、文件操作和系统命令
 
-## Requirements
+## 系统要求
 
-- Neovim 0.9.0 or higher
-- Go 1.21 or higher
-- [Claude API key](https://console.anthropic.com/) or other supported AI provider
+- Neovim 0.9.0 或更高版本
+- Go 1.21 或更高版本
+- 支持的 AI 模型 API 密钥：
+  - [Claude API 密钥](https://console.anthropic.com/)
+  - [豆包 API 密钥](https://www.doubao.com/)
+  - [DeepSeek API 密钥](https://platform.deepseek.com/)
 
-## Installation
+## 安装
 
 ```bash
-# Using your preferred Neovim plugin manager
-# For example, with lazy.nvim:
+# 使用您喜欢的 Neovim 插件管理器
+# 例如，使用 lazy.nvim：
 {
-  "yourusername/vimcoplit",
+  "liangsj/vimcoplit",
   dependencies = {
     "nvim-lua/plenary.nvim",
     "nvim-telescope/telescope.nvim",
@@ -39,51 +45,65 @@ VimCoplit consists of two main components:
 }
 ```
 
-## Configuration
+## 配置
 
 ```lua
--- In your Neovim config
+-- 在您的 Neovim 配置中
 require('vimcoplit').setup({
-  api_key = "your-claude-api-key",
-  model = "claude-3-sonnet-20240229",
-  -- Additional configuration options
+  -- 选择使用的模型
+  model = "claude-3-sonnet-20240229", -- 可选: "claude-3-sonnet-20240229", "doubao", "deepseek"
+  
+  -- 模型 API 密钥
+  api_key = "your-api-key",
+  
+  -- 其他配置选项
+  max_tokens = 4096,
+  temperature = 0.7,
 })
 ```
 
-## Usage
+## 使用方法
 
-- `:VimCoplit` - Open the VimCoplit interface
-- `:VimCoplitTask <task>` - Start a new task
-- `:VimCoplitAddContext` - Add context to the current task
+- `:VimCoplit` - 打开 VimCoplit 界面
+- `:VimCoplitTask <task>` - 开始新任务
+- `:VimCoplitAddContext` - 为当前任务添加上下文
+- `:VimCoplitSwitchModel` - 切换使用的 AI 模型
 
-## Development
+## 开发
 
-### Project Structure
+### 项目结构
 
 ```
 vimcoplit/
-├── cmd/                # Go backend entry points
-├── internal/           # Go backend implementation
-├── lua/                # Neovim plugin code
-│   └── vimcoplit/      # Plugin modules
-├── scripts/            # Build and utility scripts
-└── test/               # Test files
+├── cmd/                # Go 后端入口点
+├── internal/           # Go 后端实现
+│   ├── api/           # API 处理器
+│   ├── core/          # 核心服务
+│   └── models/        # AI 模型集成
+├── lua/                # Neovim 插件代码
+│   └── vimcoplit/      # 插件模块
+├── scripts/            # 构建和工具脚本
+└── test/               # 测试文件
 ```
 
-### Building
+### 构建
 
 ```bash
-# Build the Go backend
+# 构建 Go 后端
 go build -o bin/vimcoplit ./cmd/vimcoplit
 
-# Build the Neovim plugin
+# 构建 Neovim 插件
 nvim --headless -c "luafile scripts/build.lua" -c "quit"
 ```
 
-## Contributing
+## 贡献
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+欢迎贡献！请随时提交 Pull Request。
 
-## License
+## 许可证
 
-Apache 2.0 © 2025 VimCoplit Contributors 
+Apache 2.0 © 2025 VimCoplit Contributors
+
+## 致谢
+
+本项目基于 [Cline](https://github.com/cline/cline) 项目开发，感谢原项目的所有贡献者。 

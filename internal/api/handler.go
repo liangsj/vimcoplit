@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/liangsj/vimcoplit/internal/core"
+	"github.com/liangsj/vimcoplit/internal/models"
 )
 
 // Handler 处理所有HTTP请求
@@ -41,6 +42,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.handleExecute(w, r)
 	case "/api/generate":
 		h.handleGenerate(w, r)
+	case "/api/model":
+		h.handleModel(w, r)
 	default:
 		http.NotFound(w, r)
 	}
@@ -187,4 +190,34 @@ func (h *Handler) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(map[string]string{"response": response})
+}
+
+// handleModel 处理模型相关的请求
+func (h *Handler) handleModel(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		// 获取当前模型
+		modelType := h.service.GetCurrentModel()
+		json.NewEncoder(w).Encode(map[string]string{"model": string(modelType)})
+
+	case "POST":
+		// 切换模型
+		var req struct {
+			ModelType string `json:"model_type"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if err := h.service.SwitchModel(r.Context(), models.ModelType(req.ModelType)); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
 }
