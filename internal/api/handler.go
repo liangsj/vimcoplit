@@ -60,14 +60,15 @@ func (h *Handler) handleTasks(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
-		taskID, err := h.service.CreateTask(r.Context(), req.Description)
+		task := &core.Task{
+			Description: req.Description,
+		}
+		err := h.service.CreateTask(r.Context(), task)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		json.NewEncoder(w).Encode(map[string]string{"task_id": taskID})
+		json.NewEncoder(w).Encode(map[string]string{"task_id": task.ID})
 
 	case "GET":
 		taskID := r.URL.Query().Get("id")
@@ -75,13 +76,11 @@ func (h *Handler) handleTasks(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "task ID is required", http.StatusBadRequest)
 			return
 		}
-
 		task, err := h.service.GetTask(r.Context(), taskID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 		json.NewEncoder(w).Encode(task)
 
 	default:
@@ -98,14 +97,12 @@ func (h *Handler) handleFiles(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "path is required", http.StatusBadRequest)
 			return
 		}
-
 		content, err := h.service.ReadFile(r.Context(), path)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		json.NewEncoder(w).Encode(map[string]string{"content": content})
+		json.NewEncoder(w).Encode(map[string]string{"content": string(content)})
 
 	case "POST":
 		var req struct {
@@ -116,26 +113,10 @@ func (h *Handler) handleFiles(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
-		if err := h.service.WriteFile(r.Context(), req.Path, req.Content); err != nil {
+		if err := h.service.WriteFile(r.Context(), req.Path, []byte(req.Content)); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		w.WriteHeader(http.StatusOK)
-
-	case "DELETE":
-		path := r.URL.Query().Get("path")
-		if path == "" {
-			http.Error(w, "path is required", http.StatusBadRequest)
-			return
-		}
-
-		if err := h.service.DeleteFile(r.Context(), path); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		w.WriteHeader(http.StatusOK)
 
 	default:
@@ -149,22 +130,24 @@ func (h *Handler) handleExecute(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
 	var req struct {
-		Command string `json:"command"`
+		Command string   `json:"command"`
+		Args    []string `json:"args"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	output, err := h.service.ExecuteCommand(r.Context(), req.Command)
+	cmd := &core.Command{
+		Command: req.Command,
+		Args:    req.Args,
+	}
+	result, err := h.service.ExecuteCommand(r.Context(), cmd)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	json.NewEncoder(w).Encode(map[string]string{"output": output})
+	json.NewEncoder(w).Encode(result)
 }
 
 // handleGenerate 处理AI响应生成请求
@@ -173,22 +156,18 @@ func (h *Handler) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
 	var req struct {
-		TaskID string `json:"task_id"`
 		Prompt string `json:"prompt"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	response, err := h.service.GenerateResponse(r.Context(), req.TaskID, req.Prompt)
+	response, err := h.service.GenerateResponse(r.Context(), req.Prompt)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	json.NewEncoder(w).Encode(map[string]string{"response": response})
 }
 
@@ -209,12 +188,10 @@ func (h *Handler) handleModel(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
 		if err := h.service.SwitchModel(r.Context(), models.ModelType(req.ModelType)); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
 		w.WriteHeader(http.StatusOK)
 
 	default:
