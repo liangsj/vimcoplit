@@ -64,4 +64,7 @@ release/
 
 # Cline相关
 /cline/
-/cline/** 
+/cline/**
+
+# Project specific
+IMPLEMENTATION_PLAN.md 
