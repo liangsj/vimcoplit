@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/liangsj/vimcoplit/internal/models"
 )
 
@@ -80,6 +82,7 @@ type FileEvent struct {
 	Path      string        `json:"path"`
 	Type      FileEventType `json:"type"`
 	Timestamp int64         `json:"timestamp"`
+	Error     error         `json:"error"`
 }
 
 // FileEventType 表示文件事件类型
@@ -142,8 +145,56 @@ func (s *serviceImpl) WriteFile(ctx context.Context, path string, content []byte
 }
 
 func (s *serviceImpl) WatchFile(ctx context.Context, path string) (<-chan FileEvent, error) {
-	// TODO: 实现监听文件的逻辑
-	return nil, nil
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return nil, err
+	}
+
+	events := make(chan FileEvent)
+	go func() {
+		defer watcher.Close()
+		defer close(events)
+
+		err := watcher.Add(path)
+		if err != nil {
+			events <- FileEvent{Error: err}
+			return
+		}
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				var eventType FileEventType
+				switch {
+				case event.Op&fsnotify.Create == fsnotify.Create:
+					eventType = FileEventCreated
+				case event.Op&fsnotify.Write == fsnotify.Write:
+					eventType = FileEventModified
+				case event.Op&fsnotify.Remove == fsnotify.Remove:
+					eventType = FileEventDeleted
+				default:
+					continue
+				}
+				events <- FileEvent{
+					Path:      event.Name,
+					Type:      eventType,
+					Timestamp: time.Now().Unix(),
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				events <- FileEvent{Error: err}
+			}
+		}
+	}()
+
+	return events, nil
 }
 
 func (s *serviceImpl) ExecuteCommand(ctx context.Context, cmd *Command) (*CommandResult, error) {
