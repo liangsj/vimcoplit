@@ -1,0 +1,67 @@
+# Go相关
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/vendor/
+/bin/
+*.prof
+*.trace
+
+# Go工作目录
+go.work
+
+# 依赖目录
+/vendor/
+
+# 编译输出
+/bin/
+/dist/
+
+# IDE和编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Neovim相关
+plugin/
+doc/
+*.vim
+*.lua
+*.so
+*.dylib
+*.dll
+
+# 日志文件
+*.log
+
+# 环境变量文件
+.env
+.env.local
+
+# 临时文件
+tmp/
+temp/
+
+# 测试覆盖率报告
+coverage.txt
+coverage.html
+
+# 构建产物
+build/
+release/
+
+# 其他
+*.bak
+*.tmp
+*.temp
+
+# Cline相关
+/cline/
+/cline/** 
