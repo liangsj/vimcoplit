@@ -1,0 +1,29 @@
+{
+  "id": "echo",
+  "name": "Echo Tool",
+  "description": "A simple tool that echoes back the input message",
+  "version": "1.0.0",
+  "author": "VimCoplit Team",
+  "parameters": [
+    {
+      "name": "message",
+      "type": "string",
+      "description": "The message to echo back",
+      "required": true
+    }
+  ],
+  "metadata": {
+    "endpoint": "/api/tools/echo"
+  },
+  "timeout": 5,
+  "retry_count": 3,
+  "retry_delay": 1,
+  "concurrency": 10,
+  "rate_limit": 100,
+  "require_auth": false,
+  "log_level": "info",
+  "log_file": "logs/echo.log",
+  "log_format": "json",
+  "log_max_size": 100,
+  "log_max_files": 5
+} 

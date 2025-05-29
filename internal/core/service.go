@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/liangsj/vimcoplit/internal/core/mcp"
 	"github.com/liangsj/vimcoplit/internal/models"
 )
 
@@ -32,6 +33,12 @@ type Service interface {
 	GenerateResponse(ctx context.Context, prompt string) (string, error)
 	SwitchModel(ctx context.Context, modelType models.ModelType) error
 	GetCurrentModel() models.ModelType
+
+	// Context Manager
+	GetContextManager() ContextManager
+
+	// MCP Manager
+	GetMCPManager() mcp.ToolManager
 }
 
 // Task 表示一个任务
@@ -97,15 +104,19 @@ const (
 // NewService 创建新的核心服务实例
 func NewService() Service {
 	return &serviceImpl{
-		model: nil,
-		mu:    &sync.RWMutex{},
+		model:          nil,
+		mu:             &sync.RWMutex{},
+		contextManager: NewManager(),
+		mcpManager:     mcp.NewManager("config/mcp.json"),
 	}
 }
 
 // serviceImpl 是Service接口的具体实现
 type serviceImpl struct {
-	model models.Model
-	mu    *sync.RWMutex
+	model          models.Model
+	mu             *sync.RWMutex
+	contextManager ContextManager
+	mcpManager     mcp.ToolManager
 }
 
 // 实现Service接口的所有方法
@@ -247,4 +258,14 @@ func (s *serviceImpl) GetCurrentModel() models.ModelType {
 	}
 
 	return s.model.GetModelType()
+}
+
+// GetContextManager 返回上下文管理器
+func (s *serviceImpl) GetContextManager() ContextManager {
+	return s.contextManager
+}
+
+// GetMCPManager 返回 MCP 管理器
+func (s *serviceImpl) GetMCPManager() mcp.ToolManager {
+	return s.mcpManager
 }

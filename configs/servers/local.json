@@ -1,0 +1,41 @@
+{
+  "id": "local-server",
+  "name": "Local Server",
+  "description": "A local server for running tools",
+  "version": "1.0.0",
+  "type": "local",
+  "metadata": {
+    "environment": "development"
+  },
+  "tools": [
+    {
+      "id": "echo",
+      "name": "Echo Tool",
+      "description": "A simple tool that echoes back the input message",
+      "version": "1.0.0",
+      "author": "VimCoplit Team",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "description": "The message to echo back",
+          "required": true
+        }
+      ],
+      "metadata": {
+        "endpoint": "/api/tools/echo"
+      }
+    }
+  ],
+  "port": 8080,
+  "host": "localhost",
+  "ssl_enabled": false,
+  "allowed_origins": ["*"],
+  "allowed_methods": ["GET", "POST"],
+  "allowed_headers": ["Content-Type", "Authorization"],
+  "max_request_size": 1048576,
+  "read_timeout": 30,
+  "write_timeout": 30,
+  "idle_timeout": 120,
+  "shutdown_timeout": 30
+} 
