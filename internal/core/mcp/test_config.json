@@ -1,0 +1,22 @@
+{
+  "servers": {
+    "test-server": {
+      "id": "test-server",
+      "name": "Test Server",
+      "description": "",
+      "version": "",
+      "url": "",
+      "type": "local",
+      "status": "stopped",
+      "tools": null,
+      "created_at": "2025-05-30T07:32:34.9372044+08:00",
+      "updated_at": "2025-05-30T07:32:34.9513189+08:00",
+      "metadata": {
+        "start_cmd": "echo 'Server started'"
+      }
+    }
+  },
+  "tools": {},
+  "auto_approve": false,
+  "timeout": 30000000000
+}
